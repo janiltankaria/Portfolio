@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Janil Tankaria</title>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400&display=swap" rel="stylesheet">
+    <script defer src="https://friconix.com/cdn/friconix.js"> </script>
+    <style>
+        * {
+    outline: none;
+    padding: 0px;
+    margin: 0px;
+    box-sizing: border-box;
+    font-family: 'Open Sans', sans-serif;
+}
+
+#canvas{
+    border: none;
+    z-index: -1;    
+}
+
+body{
+    margin: 0;
+    overflow: hidden;
+    height: 100%;
+    position: fixed; 
+}
+
+button {
+    outline: none;
+    border: none;
+}
+.nav-btn {
+    vertical-align: center;
+    text-align: center;
+    width: 46px;
+    height: 46px;
+    position: absolute;
+    top: 50px;
+    left: 35px;
+    background-color: #A500FF;
+    border-radius: 50%;
+    z-index: 2;
+    color: #fff;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease-out;
+    transform: rotateZ(0deg);
+}
+
+.nav-btn.opened {
+    transition: all 0.5s ease-out;
+    transform: rotateZ(-90deg);
+    color: #A500FF;
+    background-color: #F7F7F7;
+}
+
+.nav {
+    box-shadow: 2px 0px 10px #848484;
+    position: absolute;
+    width: 110px;
+    height: 100%;
+    z-index: 1;
+    left:0px;
+    top:-100%;
+    background: #F7F7F7;
+    clip-path: circle(100px at 0% 0%);
+    transition: all 1s ease-out;
+}
+.nav.opened {
+    border-radius: 0%;
+    transition: all 0.5s ease-out;
+    top: 0px;
+    clip-path: circle(1000px at 0% 0%);
+    
+}
+
+.menu .logo a{
+  text-decoration: none;
+  color: #fff;
+  font-size: 35px;
+  font-weight: 600;
+}
+.menu ul{
+  display: inline-flex;
+}
+.menu ul li{
+  list-style: none;
+  margin-left: 7px;
+}
+.menu ul li:first-child{
+  margin-left: 0px;
+}
+.menu ul li a{
+  text-decoration: none;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 500;
+  padding: 8px 15px;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+.menu ul li a:hover{
+  background: #fff;
+  color: black;
+}
+
+.navicon-holder {
+    margin-top: 200px;
+    width: 100%;
+    height: 50%;
+    align-items: center;
+}
+
+.navicon {
+    background-color: white;
+    border: none;
+    margin: auto;
+}
+
+.colorpicker {
+    clip-path: circle(20px);
+    overflow: hidden;
+    border-radius: 50%;
+    width: 100%;
+    height: 60px;
+}
+
+.slider {
+    margin: auto;
+}
+
+.width {
+    text-align: center;
+    margin: 40px auto;
+    
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 80%;
+  height: 15px;
+  border-radius: 5px;  
+  background: #d3d3d3;
+  outline: none;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%; 
+  background: #4CAF50;
+  cursor: pointer;
+}
+
+.color, .width, .clear, .eraser{
+    text-align: center;
+    margin: auto;
+    cursor: pointer;
+}
+
+.clear .eraser {
+    transform: scale(2);
+}
+
+p {
+    user-select: none;
+    padding-top: 10px;
+    padding-bottom: 30px;
+}
+
+.eraser.on {
+    color: #A500FF;
+    transition: color 0.2s ease-out;
+}
+
+
+
+
+
+
+
+
+
+
+    </style>
+    <script>
+        window.addEventListener('load', () => {
+    const canvas = document.querySelector("#canvas");
+    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+    const ctx = canvas.getContext('2d');
+    let color = "#000000";
+    let drawing = false;
+    let width = 10;
+    let rect = false;
+    let eraser = false;
+    function startdraw(e) {
+      ctx.beginPath();
+      drawing = true;
+      draw(e);
+    }
+  
+    function stopdraw(e) {
+      drawing = false;
+    }
+  
+    function draw(e) {
+      if (drawing) {
+        // desktop and mobile -friendly
+        try {
+          touch = e.touches[0];
+          x = touch.pageX;
+          y = touch.pageY;
+        } catch (err) {
+          x = e.clientX;
+          y = e.clientY;
+        }
+  
+  
+        width = document.querySelector(".slider").value;
+        ctx.lineWidth = width;
+        if (eraser){
+            ctx.strokeStyle = "#fff";
+        }
+        else {
+            ctx.strokeStyle = color;
+        }
+        ctx.lineCap = "round";
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+      }
+    }
+    // event listeners
+    canvas.addEventListener("mousedown", startdraw);
+    canvas.addEventListener("mouseup", stopdraw);
+    canvas.addEventListener("mousemove", draw);
+    canvas.addEventListener("touchstart", startdraw);
+    canvas.addEventListener("touchend", stopdraw);
+    canvas.addEventListener("touchmove", draw);
+    document.querySelector(".nav-btn").addEventListener("click", opensidenav);
+    document.querySelector(".colorpicker").addEventListener("change", colorpickerchange, false);
+    document.querySelector(".clear").addEventListener("click", clearcanvas);
+    document.querySelector(".eraser").addEventListener("click", toggleeraser);
+  
+    function clearcanvas(event) {
+            swal("Do you really want to clear canvas?", {
+            buttons: {
+              cancel: "No",
+              yes: "Yes",
+            },
+          })
+          .then((value) => {
+            if (value == 'yes') {
+                ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+                
+           
+           
+        }
+      });
+      
+  
+    }
+  
+    function toggleeraser(){
+        if (eraser){
+            document.querySelector(".eraser").classList.remove("on");
+            eraser = false;
+        }
+        else {
+            document.querySelector(".eraser").classList.add("on");
+            eraser = true;
+        }
+    }
+    function colorpickerchange(event) {
+      color = event.target.value;
+    }
+  });
+  
+  function opensidenav() {
+    document.querySelector(".nav").classList.toggle("opened");
+    document.querySelector(".nav-btn").classList.toggle("opened");
+  
+  }
+  
+    </script>
+</head>
+
+
+<body>
+  <nav>
+    <div class="menu">
+      <div class="logo">
+        <a href="#">Janil Tankaria</a>
+      </div>
+      
+  </nav>
+    <div class = "nav-btn"><i class="fi-xnsuxl-three-bars-solid"></i></div>
+    <div class = "nav">
+        <div class = "navicon-holder">
+                <div class = "color">
+                    <input class = "navicon colorpicker" type="color" value="#000000">
+                    <p class="label">Color</p>
+                </div>
+            
+            <div class = "width">
+                <input type = "range" min="1" max="30" value="10" class="slider">
+                <p class="label">Width</p>
+            </div>
+
+            <div class = "eraser">
+                <i class="fi-onpuxl-pen"></i>
+                <p class = "label">Eraser</p>
+            </div>
+
+            <div class = "clear">
+                <i class="fi-xnsuxl-trash-bin"></i>
+                <p class = "label">Clear</p>
+            </div>
+        </div>
+    </div>
+
+    <canvas id = "canvas">Oops! Looks like something went wrong. Please make sure your browser does support canvas element. Try refreshing the page</canvas>
+</body>
+</html>    
